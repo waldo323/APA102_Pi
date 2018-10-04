@@ -1,8 +1,8 @@
 """This module contains a few concrete colour cycles to play with"""
 
-from colorcycletemplate import ColorCycleTemplate
+from driver import colorcycletemplate
 
-class StrandTest(ColorCycleTemplate):
+class StrandTest(colorcycletemplate.ColorCycleTemplate):
     """Runs a simple strand test (9 LEDs wander through the strip)."""
 
     color = None
@@ -17,11 +17,13 @@ class StrandTest(ColorCycleTemplate):
             self.color >>= 8  # Red->green->blue->black
         if self.color == 0:
             self.color = 0xFF0000  # If black, reset to red
-        len = 9
-        if num_led - 1 < len:
-            len = num_led - 1 
+        bloblen = 9
+        if num_led - 1 < bloblen:
+            bloblen = num_led - 3
+        if num_led <= 0:
+            bloblen = 1 
         # The head pixel that will be turned on in this cycle
-        head = (current_step + len) % num_steps_per_cycle
+        head = (current_step + bloblen) % num_steps_per_cycle
         tail = current_step # The tail pixel that will be turned off
         strip.set_pixel_rgb(head, self.color)  # Paint head
         strip.set_pixel_rgb(tail, 0)  # Clear tail
@@ -29,7 +31,7 @@ class StrandTest(ColorCycleTemplate):
         return 1 # Repaint is necessary
 
 
-class TheaterChase(ColorCycleTemplate):
+class TheaterChase(colorcycletemplate.ColorCycleTemplate):
     """Runs a 'marquee' effect around the strip."""
     def update(self, strip, num_led, num_steps_per_cycle, current_step,
                current_cycle):
@@ -49,7 +51,7 @@ class TheaterChase(ColorCycleTemplate):
         return 1
 
 
-class RoundAndRound(ColorCycleTemplate):
+class RoundAndRound(colorcycletemplate.ColorCycleTemplate):
     """Runs three LEDs around the strip."""
 
     def init(self, strip, num_led):
@@ -64,20 +66,25 @@ class RoundAndRound(ColorCycleTemplate):
         return 1
 
 
-class Solid(ColorCycleTemplate):
+class Solid(colorcycletemplate.ColorCycleTemplate):
     """Paints the strip with one colour."""
-
-    def init(self, strip, num_led):
-        for led in range(0, num_led):
-            strip.set_pixel_rgb(led,0xFFFFFF,5) # Paint 5% white
 
     def update(self, strip, num_led, num_steps_per_cycle, current_step,
                current_cycle):
-        # Do nothing: Init lit the strip, and update just keeps it this way
-        return 0
+        if (current_step == 0):
+            stripcolour = 0xFFFFFF
+        if (current_step == 1):
+            stripcolour = 0xFF0000
+        if (current_step == 2):
+            stripcolour = 0x00FF00
+        if (current_step == 3):
+            stripcolour = 0x0000FF
+        for led in range(0, num_led):
+            strip.set_pixel_rgb(led,stripcolour,5) # Paint 5% white  
+        return 1
 
 
-class Rainbow(ColorCycleTemplate):
+class Rainbow(colorcycletemplate.ColorCycleTemplate):
     """Paints a rainbow effect across the entire strip."""
     def update(self, strip, num_led, num_steps_per_cycle, current_step,
                current_cycle):
